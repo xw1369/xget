@@ -448,6 +448,10 @@ function isAIInferenceRequest(request, url) {
  * // { valid: false, error: 'Path too long', status: 414 }
  */
 function validateRequest(request, url, config = CONFIG) {
+	// OPTIONS 请求总是允许（CORS 预检）
+  if (request.method === 'OPTIONS') {
+    return { valid: true };
+  }
   // Allow POST method for Git, Git LFS, Docker, and AI inference operations
   const isGit = isGitRequest(request, url);
   const isGitLFS = isGitLFSRequest(request, url);
@@ -750,6 +754,15 @@ async function handleRequest(request, env, ctx) {
     // Create config with environment variable overrides
     const config = env ? createConfig(env) : CONFIG;
     const url = new URL(request.url);
+	// 处理 CORS 预检请求 (OPTIONS)
+    if (request.method === 'OPTIONS') {
+      const headers = new Headers();
+      headers.set('Access-Control-Allow-Origin', '*');
+      headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD');
+      headers.set('Access-Control-Allow-Headers', '*');
+      headers.set('Access-Control-Max-Age', '86400');
+      return new Response(null, { status: 204, headers });
+    }
     const isDocker = isDockerRequest(request, url);
 
     const monitor = new PerformanceMonitor();
