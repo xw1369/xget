@@ -547,6 +547,12 @@ function addSecurityHeaders(headers) {
   headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   headers.set('Content-Security-Policy', "default-src 'none'; img-src 'self'; script-src 'none'");
   headers.set('Permissions-Policy', 'interest-cohort=()');
+
+  // CORS headers
+  headers.set('Access-Control-Allow-Origin', '*');
+  headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD');
+  headers.set('Access-Control-Allow-Headers', '*');
+  headers.set('Access-Control-Max-Age', '86400');
   return headers;
 }
 
