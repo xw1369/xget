@@ -994,15 +994,20 @@ async function handleRequest(request, env, ctx) {
           requestHeaders.set('User-Agent', 'Xget-AI-Proxy/1.0');
         }
 
-				// Add specific authorization for AnyRouter
-        if (platform === 'ip-anyrouter') {
-					const xApiKey = request.headers.get('x-api-key');
-          if (xApiKey) {
-            requestHeaders.set('Authorization', `Bearer ${xApiKey}`);
-          } else {
-						requestHeaders.set('Authorization', 'Bearer sk-');
-					}
-        }
+		// Add specific authorization for AnyRouter
+		if (platform === 'ip-anyrouter') {
+		  const authHeader = request.headers.get('Authorization');
+		  const xApiKey = request.headers.get('x-api-key');
+		  
+		  if (authHeader) {
+		    // 如果有 Authorization header，保持不变（已经在上面的循环中复制了）
+		    // 不需要做任何修改
+		  } else if (xApiKey) {
+		    // 如果没有 Authorization 但有 x-api-key，转换为 Bearer token
+		    requestHeaders.set('Authorization', `Bearer ${xApiKey}`);
+		  }
+		  // 如果两个都没有，不设置 Authorization，让上游返回 401
+		}
       }
     } else {
       // Regular file download headers
