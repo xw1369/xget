@@ -208,7 +208,7 @@ export const PLATFORMS = {
   'ip-poe': 'https://api.poe.com',
   'ip-featherlessai': 'https://api.featherless.ai',
   'ip-hyperbolic': 'https://api.hyperbolic.xyz',
-
+  'ip-anyrouter': 'https://anyrouter.top',
   // Container Registries
   'cr-docker': 'https://registry-1.docker.io',
   'cr-quay': 'https://quay.io',
