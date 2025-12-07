@@ -909,11 +909,17 @@ async function handleRequest(request, env, ctx) {
     };
 
     // Add body for POST/PUT/PATCH requests (Git/Docker/AI inference operations)
+	let requestBodyContent = null;
     if (
       ['POST', 'PUT', 'PATCH'].includes(request.method) &&
       (isGit || isGitLFS || isDocker || isAI)
     ) {
-      fetchOptions.body = request.body;
+      try {
++        // 将 body 读取为 ArrayBuffer，这样可以在重试时重复使用
++        requestBodyContent = await request.arrayBuffer();
++      } catch (e) {
++        console.warn('Could not read request body:', e);
++      }
     }
 
     // Cast headers to Headers for proper typing
@@ -1061,11 +1067,17 @@ async function handleRequest(request, env, ctx) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), config.TIMEOUT_SECONDS * 1000);
 
-        // For Git/Docker operations, don't use Cloudflare-specific options
-        const finalFetchOptions =
-          isGit || isDocker
-            ? { ...fetchOptions, signal: controller.signal }
-            : { ...fetchOptions, signal: controller.signal };
+		// 为每次重试创建新的 fetch options
++        const finalFetchOptions = {
++          ...fetchOptions,
++          signal: controller.signal,
++          headers: requestHeaders
++        };
++
++        // 如果有保存的 body 内容，添加到 fetch options
++        if (requestBodyContent !== null) {
++          finalFetchOptions.body = requestBodyContent;
++        }
 
         // Special handling for HEAD requests to ensure Content-Length header
         if (request.method === 'HEAD') {
