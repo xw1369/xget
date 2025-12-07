@@ -978,6 +978,16 @@ async function handleRequest(request, env, ctx) {
         if (!requestHeaders.has('User-Agent')) {
           requestHeaders.set('User-Agent', 'Xget-AI-Proxy/1.0');
         }
+
+				// Add specific authorization for AnyRouter
+        if (platform === 'ip-anyrouter') {
+					const xApiKey = request.headers.get('x-api-key');
+          if (xApiKey) {
+            requestHeaders.set('Authorization', `Bearer ${xApiKey}`);
+          } else {
+						requestHeaders.set('Authorization', 'Bearer sk-');
+					}
+        }
       }
     } else {
       // Regular file download headers
